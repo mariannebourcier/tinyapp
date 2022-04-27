@@ -1,24 +1,30 @@
-const express = require("express");
-const app = express();
-const PORT = 8080; // default port 8080
 
-app.set('view engine', "ejs");
+//REQUIREMENTS
+const express = require("express");
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+urlDatabase["9sm5xK"];
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+//SETUP AND MIDDLEWARES
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+const app = express();
+const PORT = 8080; // default port 8080
 
+
+app.set('view engine', "ejs");
+
+//ROUTES/ENDPOINTS
+//CRUD RESTAPI
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+});
+
+//RENDERING ROUTES/FRONTEND
+app.get("/", (req, res) => {
+  res.send("Hello!");
 });
 
 app.get("/hello", (req, res) => {
@@ -31,6 +37,15 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  const { shortURL } = req.params;
+  const templateVars = {
+    longURL: urlDatabase[shortURL],
+    shortURL: shortURL
+  };
   res.render("urls_show", templateVars);
+});
+
+//LISTENER
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
