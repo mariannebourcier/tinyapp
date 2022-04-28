@@ -1,5 +1,15 @@
+//random shorturl
+const generateRandomString = function()  {
+  return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
+};
+console.log(generateRandomString());
+
+
 
 //REQUIREMENTS
+const bodyParser = require("body-parser");
+
+
 const express = require("express");
 
 const urlDatabase = {
@@ -15,6 +25,7 @@ const PORT = 8080; // default port 8080
 
 
 app.set('view engine', "ejs");
+app.use(bodyParser.urlencoded({extended: true}));
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -40,6 +51,11 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   const templateVars = {
@@ -48,6 +64,7 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
 
 //LISTENER
 app.listen(PORT, () => {
