@@ -33,29 +33,31 @@ app.get("/urls.json", (req, res) => {
 });
 
 //RENDERING ROUTES/FRONTEND
+//compass instruction
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
-
+//compass instruction
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-
+//compass instruction
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
-
+//new url page
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
-
+//generate short url,
+//**add 200 code smwr
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
-
+//urls short/long page
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   const templateVars = {
@@ -64,7 +66,14 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+//redirect to longurl
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
 
+  if (longURL) {
+    res.redirect(urlDatabase[req.params.shortURL]);
+  }
+});
 
 //LISTENER
 app.listen(PORT, () => {
