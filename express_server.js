@@ -72,7 +72,13 @@ app.get("/u/:shortURL", (req, res) => {
 
   if (longURL) {
     res.redirect(urlDatabase[req.params.shortURL]);
+  } else if (!longURL) {
+    //edge case: non existent short url
+    res.statusCode = 404;
+    res.send("<p>404: Not found. This short URL does not exist.</p>");
   }
+  //edge case: urldatabase server restarted
+  //status code of redirects
 });
 
 //LISTENER
