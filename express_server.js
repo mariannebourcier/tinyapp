@@ -80,7 +80,10 @@ app.get("/u/:shortURL", (req, res) => {
   //edge case: urldatabase server restarted
   //status code of redirects
 });
-
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+});
 //LISTENER
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
