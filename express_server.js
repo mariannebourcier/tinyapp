@@ -2,7 +2,7 @@
 const generateRandomString = function()  {
   return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
 };
-console.log(generateRandomString());
+//console.log(generateRandomString());
 
 
 
