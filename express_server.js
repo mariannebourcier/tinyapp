@@ -9,15 +9,19 @@ const generateRandomString = function()  {
 const bodyParser = require("body-parser");
 
 
+
 const express = require("express");
+
+//cookie-parser
+const cookieParser = require('cookie-parser');
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 urlDatabase["9sm5xK"];
-//cookie-parser
-const cookieParser = require('cookie-parser');
+
 //SETUP AND MIDDLEWARES
 
 const app = express();
@@ -26,6 +30,7 @@ const PORT = 8080; // default port 8080
 
 app.set('view engine', "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -44,12 +49,13 @@ app.get("/hello", (req, res) => {
 });
 //compass instruction
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   res.render("urls_index", templateVars);
 });
 //new url page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {username: req.cookies['username']};
+  res.render("urls_new", templateVars);
 });
 //generate short url,
 //**add 200 code smwr
@@ -83,6 +89,11 @@ app.get("/u/:shortURL", (req, res) => {
 });
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+});
+
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 //LISTENER
