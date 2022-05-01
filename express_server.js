@@ -16,7 +16,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 urlDatabase["9sm5xK"];
-
+//cookie-parser
+const cookieParser = require('cookie-parser');
 //SETUP AND MIDDLEWARES
 
 const app = express();
