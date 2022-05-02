@@ -88,19 +88,26 @@ app.get("/u/:shortURL", (req, res) => {
   //edge case: urldatabase server restarted
   //status code of redirects
 });
+//delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
-
+//login
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
-
+//logout
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
+});
+
+//registration page
+app.get('/register', (req, res) => {
+  const templateVars = {username: req.cookies['username']};
+  res.render('urls_registration', templateVars);
 });
 //LISTENER
 app.listen(PORT, () => {
