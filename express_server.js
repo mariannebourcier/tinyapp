@@ -68,6 +68,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   const templateVars = {
+    username:req.cookies['username'],
     longURL: urlDatabase[shortURL],
     shortURL: shortURL
   };
@@ -96,6 +97,8 @@ app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
+
+
 //LISTENER
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
