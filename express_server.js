@@ -106,12 +106,12 @@ app.post('/logout', (req, res) => {
 
 //registration page
 app.get('/register', (req, res) => {
-  const templateVars = {username: req.cookies['user_id']};
+  const templateVars = {user:  users[req.cookies['user_id']] };
   res.render('urls_register', templateVars);
 });
 
 //registering new users
-const users = {};
+const users = { };
 //email function
 const emailFunction = (email) => {
   for (const user in users) {
@@ -123,14 +123,21 @@ const emailFunction = (email) => {
 };
 
 app.post('/register', (req, res) => {
-  const userID = generateRandomString();
-  users[userID] = {
-    userID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookies('user_id', userID);
-  res.redirect('/urls');
+  if (req.body.email && req.body.password) {
+    if (!emailFunction(req.body.email)) {
+      const userID = generateRandomString();
+      users[userID] = {
+        userID,
+        email: req.body.email,
+        password: req.body.password
+      };
+      res.cookies('user_id', userID);
+      res.redirect('/urls');
+    } else {
+      res.statusCode = 409;
+      res.send('<p>409: Already taken. The email you have entered is already linked to an account.');
+    }
+  }
 });
 
 //LISTENER
