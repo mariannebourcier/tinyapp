@@ -130,7 +130,7 @@ app.post('/register', (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  res.cookies('userID', userID);
+  res.cookies('user_id', userID);
   res.redirect('/urls');
 });
 //LISTENER
