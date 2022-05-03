@@ -111,9 +111,17 @@ app.get('/register', (req, res) => {
 });
 
 //registering new users
-const users = {
- 
+const users = {};
+//email function
+const emailFunction = (email) => {
+  for (const user in users) {
+    if (users[user.email] === email) {
+      return true;
+    }
+  }
+  return false;
 };
+
 app.post('/register', (req, res) => {
   const userID = generateRandomString();
   users[userID] = {
@@ -124,6 +132,7 @@ app.post('/register', (req, res) => {
   res.cookies('user_id', userID);
   res.redirect('/urls');
 });
+
 //LISTENER
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
