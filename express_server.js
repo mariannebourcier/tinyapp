@@ -107,7 +107,31 @@ app.post('/logout', (req, res) => {
 //registration page
 app.get('/register', (req, res) => {
   const templateVars = {username: req.cookies['username']};
-  res.render('urls_registration', templateVars);
+  res.render('urls_register', templateVars);
+});
+
+//registering new users
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+app.post('/register', (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = {
+    userID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookies('userID', userID);
+  res.redirect('/urls');
 });
 //LISTENER
 app.listen(PORT, () => {
