@@ -11,6 +11,9 @@
       </div>
     </div>
       <a class="btn bg-transparent btn-outline-light" href="/urls_login">Login</a>
+      <% if (user) { %>
+        <a class="btn bg-transparent btn-outline-light" href="/urls">Logout</a>
+      <% } %> 
       <a class="btn bg-transparent btn-outline-light" href="/urls_register">Register</a>
     
     <!-- Login/logout
