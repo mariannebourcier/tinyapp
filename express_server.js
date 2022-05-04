@@ -110,33 +110,78 @@ app.get('/register', (req, res) => {
   res.render('urls_register', templateVars);
 });
 
+
+
+
+
+
+
+
+
+
 //registering new users
-let users = { };
+let users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 //email function
 let emailFunction = (email) => {
   for (let user in users) {
-    if (users[user.email] === email) {
+    if (user.email === email) {
       return true;
     }
   }
   return false;
 };
 
-app.post('/register', (req, res) => {
-  let userID = generateRandomString();
-  users[userID] = {
-    userID,
-    email: req.body.email,
-    password: req.body.password
+//new user
+let newUser = (email, password) => {
+  let userId = generateRandomString();
+  users[userId] = {
+    userId,
+    email,
+    password
   };
-  if (req.body.email && req.body.password) {
-    res.cookie('user_id', userID);
-    res.redirect('/urls');
+  return userId;
+};
+
+app.post("/register", (req, res) => {
+  if (!emailFunction(req.body.email)) {
+    let newUserRegister = newUser(req.body.email, req.body.password);
+    res.cookie("user_id", newUserRegister);
+    res.redirect("/urls");
+  } else if (emailFunction(req.body.email)) {
+    res.statusCode = 409;
+    res.send("409: This email is already registered. Please enter a different email.");
   } else {
     res.statusCode = 409;
-    res.send('<p>409: Email already taken. Please try another email.</p>');
+    res.send("409: Field empty. Please fill the required fields.");
   }
 });
+
+// app.post('/register', (req, res) => {
+//   let userID = generateRandomString();
+//   users[userID] = {
+//     userID,
+//     email: req.body.email,
+//     password: req.body.password
+//   };
+//   if (req.body.email && req.body.password) {
+//     res.cookie('user_id', userID);
+//     res.redirect('/urls');
+//   } else {
+//     res.statusCode = 409;
+//     res.send('<p>409: Email already taken. Please try another email.</p>');
+//   }
+// });
 
 //LISTENER
 app.listen(PORT, () => {
