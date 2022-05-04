@@ -1,22 +1,22 @@
 //random shorturl
-const generateRandomString = function()  {
+let generateRandomString = function()  {
   return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
 };
 //console.log(generateRandomString());
 
 
 //REQUIREMENTS
-const bodyParser = require("body-parser");
+let bodyParser = require("body-parser");
 
 
 
-const express = require("express");
+let express = require("express");
 
 //cookie-parser
-const cookieParser = require('cookie-parser');
+let cookieParser = require('cookie-parser');
 
 
-const urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -24,8 +24,8 @@ urlDatabase["9sm5xK"];
 
 //SETUP AND MIDDLEWARES
 
-const app = express();
-const PORT = 8080; // default port 8080
+let app = express();
+let PORT = 8080; // default port 8080
 
 
 app.set('view engine', "ejs");
@@ -49,25 +49,25 @@ app.get("/hello", (req, res) => {
 });
 //compass instruction
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
+  let templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
   res.render("urls_index", templateVars);
 });
 //new url page
 app.get("/urls/new", (req, res) => {
-  const templateVars = {user: users[req.cookies['user_id']] };
+  let templateVars = {user: users[req.cookies['user_id']] };
   res.render("urls_new", templateVars);
 });
 //generate short url,
 //**add 200 code smwr
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
+  let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 //urls short/long page
 app.get("/urls/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
-  const templateVars = {
+  let { shortURL } = req.params;
+  let templateVars = {
     user: users[req.cookies['user_id']],
     longURL: urlDatabase[shortURL],
     shortURL: shortURL
@@ -76,7 +76,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 //redirect to longurl
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL];
 
   if (longURL) {
     res.redirect(urlDatabase[req.params.shortURL]);
@@ -106,14 +106,14 @@ app.post('/logout', (req, res) => {
 
 //registration page
 app.get('/register', (req, res) => {
-  const templateVars = {user:  users[req.cookies['user_id']] };
+  let templateVars = {user:  users[req.cookies['user_id']] };
   res.render('urls_register', templateVars);
 });
 
 //registering new users
-const users = { };
+let users = { };
 //email function
-const emailFunction = (email) => {
+let emailFunction = (email) => {
   for (let user in users) {
     if (users[user.email] === email) {
       return true;
@@ -123,20 +123,18 @@ const emailFunction = (email) => {
 };
 
 app.post('/register', (req, res) => {
+  let userID = generateRandomString();
+  users[userID] = {
+    userID,
+    email: req.body.email,
+    password: req.body.password
+  };
   if (req.body.email && req.body.password) {
-    if (!emailFunction(req.body.email)) {
-      const userID = generateRandomString();
-      users[userID] = {
-        userID,
-        email: req.body.email,
-        password: req.body.password
-      };
-      res.cookies('user_id', userID);
-      res.redirect('/urls');
-    } else {
-      res.statusCode = 409;
-      res.send('<p>409: Already taken. The email you have entered is already linked to an account.');
-    }
+    res.cookie('user_id', userID);
+    res.redirect('/urls');
+  } else {
+    res.statusCode = 409;
+    res.send('<p>409: Email already taken. Please try another email.</p>');
   }
 });
 
