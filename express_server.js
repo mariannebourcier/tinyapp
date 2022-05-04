@@ -95,7 +95,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 //login **
 app.post('/login', (req, res) => {
-  res.cookie('user_id', req.body.username);
+  res.cookie('user_id', {user: users[req.cookies['user_id']]}); //*
   res.redirect('/urls');
 });
 //logout **
@@ -114,7 +114,7 @@ app.get('/register', (req, res) => {
 const users = { };
 //email function
 const emailFunction = (email) => {
-  for (const user in users) {
+  for (let user in users) {
     if (users[user.email] === email) {
       return true;
     }
