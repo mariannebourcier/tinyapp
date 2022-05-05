@@ -97,7 +97,7 @@ const userURLS = (id) => {
 //urls id short urls
 app.get("/urls/:id", (req, res) => {
   const user = req.cookies["user_id"];
-  const userUrls = req.params.id;
+  const userUrls = userURLS(urlDatabase.userID);
 
   if (!user) {
     res.send("Login or Register to access this page.");
@@ -146,15 +146,34 @@ app.get("/u/:shortURL", (req, res) => {
 
 //delete url -
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const user = req.cookies['user_id'];
+  const shortURL = req.params.shortURL;
+  const userUrl = urlDatabase[shortURL].userID;
+
+  if (!user) {
+    res.send('Login or register.');
+  }
+
+  if (userUrl !== user) {
+    res.send('Not permitted.');
+  }
+
+  if (user === userUrl) {
+    delete urlDatabase[shortURL];
+  }
+
   res.redirect('/urls');
+
 });
 
 //edit url page
 
 //login -
 app.get('/login', (req, res) => {
-  let templateVars = {user:  users[req.cookies['user_id']] };
+  const templateVars = {
+    user: users[req.cookies['user_id']]
+  };
+  
   res.render('urls_login', templateVars);
 });
 
