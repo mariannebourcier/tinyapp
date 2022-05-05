@@ -63,10 +63,11 @@ app.get("/urls", (req, res) => {
 
 //new url page -
 app.get("/urls/new", (req, res) => {
-  let templateVars = {user: users[req.cookies['user_id']] };
+  let templateVars = {user: users[req.cookies["user_id"]] };
   if (!templateVars.user) {
     return res.redirect('/login');
   }
+  //being redirected to login no matter what*** Fix
 
   res.render("urls_new", templateVars);
 });
@@ -94,13 +95,13 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//redirect to longurl
+//redirect to longurl -
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let shortURL = urlDatabase[req.params.shortURL];
 
-  if (longURL) {
+  if (shortURL) {
     res.redirect(urlDatabase[req.params.shortURL]);
-  } else if (!longURL) {
+  } else if (!shortURL) {
     //edge case: non existent short url
     res.statusCode = 404;
     res.send("<p>404: Not found. This short URL does not exist.</p>");
@@ -108,23 +109,28 @@ app.get("/u/:shortURL", (req, res) => {
   //edge case: urldatabase server restarted
   //status code of redirects
 });
-//delete url
+
+//delete url -
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
-//login **
+
+//edit url function missing?
+
+//login -
 app.get('/login', (req, res) => {
   let templateVars = {user:  users[req.cookies['user_id']] };
   res.render('urls_login', templateVars);
 });
-
+//login errors not working **
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const user = emailFunction(email);
 
-  if (!user) res.status(403).send("This account does not exist.");
-
+  if (!user) {
+    res.status(403).send("This account does not exist.");
+  }
   if (user.password === password) {
     res.cookie("user_id", user.id);
     res.redirect("/urls");
@@ -134,29 +140,18 @@ app.post('/login', (req, res) => {
 });
 
 
-//logout **
+//logout -
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
-//registration page
+//registration page -
 app.get('/register', (req, res) => {
   let templateVars = {user:  users[req.cookies['user_id']] };
   res.render('urls_register', templateVars);
 });
-
-
-
-
-
-
-
-
-
-
-
-
+//registration **
 app.post("/register", (req, res) => {
   if (!emailFunction(req.body.email)) {
     let newUserRegister = newUser(req.body.email, req.body.password);
