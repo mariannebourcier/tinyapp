@@ -35,11 +35,9 @@ let users = {
 };
 
 //functions required
-const newUser = require('helper_functions');
-const emailFunction = require('helper_functions');
-const generateRandomString = require('helper_functions');
-
-
+const newUser = require('./helper_functions');
+const emailFunction = require('./helper_functions');
+const generateRandomString = require('./helper_functions');
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -48,32 +46,44 @@ app.get("/urls.json", (req, res) => {
 });
 
 //RENDERING ROUTES/FRONTEND
+// //compass instruction
+// app.get("/", (req, res) => {
+//   res.send("Hello!");
+// });
+// //compass instruction
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 //compass instruction
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-//compass instruction
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-//compass instruction
+//url page -
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
   res.render("urls_index", templateVars);
 });
-//new url page
+
+//new url page -
 app.get("/urls/new", (req, res) => {
   let templateVars = {user: users[req.cookies['user_id']] };
+  if (!templateVars.user) {
+    return res.redirect('/login');
+  }
+
   res.render("urls_new", templateVars);
 });
-//generate short url,
-//**add 200 code smwr
+
+//generate short url, -
+//**add 200 code ?
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {
+    longURL: req.body["longURL"],
+    userID: req.cookies["user_id"]
+  };
+
   res.redirect(`/urls/${shortURL}`);
 });
-//urls short/long page
+
+//urls short/long page => show -
 app.get("/urls/:shortURL", (req, res) => {
   let { shortURL } = req.params;
   let templateVars = {
@@ -83,6 +93,7 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
 //redirect to longurl
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];

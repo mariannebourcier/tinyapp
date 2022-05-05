@@ -39,6 +39,6 @@ let newUser = (email, password) => {
 
 
 
-module.exports = newUser;
-module.exports = emailFunction;
-module.exports = generateRandomString;
+module.exports = { newUser,
+  emailFunction,
+  generateRandomString };
