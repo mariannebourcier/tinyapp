@@ -80,6 +80,20 @@ app.get("/urls/new", (req, res) => {
 
   res.render("urls_new", templateVars);
 });
+//function to return url for user
+const userURLS = (id) => {
+  let urls = [];
+
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      urls = {
+        shortURL: shortURL,
+        longURL: urlDatabase[shortURL].longURL
+      };
+    }
+  }
+  return urls;
+};
 //urls id short urls
 app.get("/urls/:id", (req, res) => {
   const user = req.cookies["user_id"];
