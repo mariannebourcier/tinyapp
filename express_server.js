@@ -1,36 +1,45 @@
-//random shorturl
-let generateRandomString = function()  {
-  return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
-};
-//console.log(generateRandomString());
-
-
 //REQUIREMENTS
 let bodyParser = require("body-parser");
-
-
-
 let express = require("express");
 
 //cookie-parser
 let cookieParser = require('cookie-parser');
 
-
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-urlDatabase["9sm5xK"];
+//urlDatabase["9sm5xK"];
 
 //SETUP AND MIDDLEWARES
-
 let app = express();
 let PORT = 8080; // default port 8080
-
 
 app.set('view engine', "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+
+
+//registering new users
+let users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
+//functions required
+const newUser = require('helper_functions');
+const emailFunction = require('helper_functions');
+const generateRandomString = require('helper_functions');
+
+
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -94,14 +103,26 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 //login **
-app.post('/login', (req, res) => {
-  res.cookie('user_id', {user: users[req.cookies['user_id']]}); //*
-  res.redirect('/urls');
-});
 app.get('/login', (req, res) => {
   let templateVars = {user:  users[req.cookies['user_id']] };
   res.render('urls_login', templateVars);
 });
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const user = emailFunction(email);
+
+  if (!user) res.status(403).send("This account does not exist.");
+
+  if (user.password === password) {
+    res.cookie("user_id", user.id);
+    res.redirect("/urls");
+  } else {
+    res.status(403).send("Password incorrect.");
+  }
+});
+
+
 //logout **
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
@@ -123,39 +144,7 @@ app.get('/register', (req, res) => {
 
 
 
-//registering new users
-let users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
-//email function
-let emailFunction = (email) => {
-  for (let user in users) {
-    if (user.email === email) {
-      return true;
-    }
-  }
-  return false;
-};
 
-//new user
-let newUser = (email, password) => {
-  let userId = generateRandomString();
-  users[userId] = {
-    userId,
-    email,
-    password
-  };
-  return userId;
-};
 
 app.post("/register", (req, res) => {
   if (!emailFunction(req.body.email)) {
