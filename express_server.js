@@ -1,3 +1,7 @@
+let generateRandomString = () =>  {
+  return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
+};
+
 //REQUIREMENTS
 let bodyParser = require("body-parser");
 let express = require("express");
@@ -5,11 +9,17 @@ let express = require("express");
 //cookie-parser
 let cookieParser = require('cookie-parser');
 
-let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
-//urlDatabase["9sm5xK"];
+
 
 //SETUP AND MIDDLEWARES
 let app = express();
@@ -37,7 +47,7 @@ let users = {
 //functions required
 const newUser = require('./helper_functions');
 const emailFunction = require('./helper_functions');
-const generateRandomString = require('./helper_functions');
+//const generateRandomString = require('./helper_functions');
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -46,15 +56,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 //RENDERING ROUTES/FRONTEND
-// //compass instruction
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
-// //compass instruction
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-//compass instruction
+
 //url page -
 app.get("/urls", (req, res) => {
   let templateVars = {
@@ -66,10 +68,14 @@ app.get("/urls", (req, res) => {
 
 //new url page -
 app.get("/urls/new", (req, res) => {
-  let templateVars = {user: users[req.cookies["user_id"]] };
-  if (!templateVars.user) {
+  let user = req.cookies['user_id'];
+  if (!user) {
     return res.redirect('/login');
   }
+
+  const templateVars = {
+    user: users[user]
+  };
   //being redirected to login no matter what*** Fix
 
   res.render("urls_new", templateVars);
@@ -79,9 +85,11 @@ app.get("/urls/new", (req, res) => {
 //**add 200 code ?
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = {
-    longURL: req.body["longURL"],
-    userID: req.cookies["user_id"]
+  let userID = req.cookies['user_id'];
+
+  urlDatabase[userID] = {
+    longURL: req.body.longURL,
+    userID: userID
   };
 
   res.redirect(`/urls/${shortURL}`);
@@ -89,10 +97,10 @@ app.post("/urls", (req, res) => {
 
 //urls short/long page => show -
 app.get("/urls/:shortURL", (req, res) => {
-  let { shortURL } = req.params;
+  let shortURL = req.params.shortURL;
   let templateVars = {
     user: users[req.cookies['user_id']],
-    longURL: urlDatabase[shortURL],
+    longURL: urlDatabase[shortURL].longURL,
     shortURL: shortURL
   };
   res.render("urls_show", templateVars);
@@ -103,14 +111,12 @@ app.get("/u/:shortURL", (req, res) => {
   let shortURL = urlDatabase[req.params.shortURL];
 
   if (shortURL) {
-    res.redirect(urlDatabase[req.params.shortURL]);
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else if (!shortURL) {
-    //edge case: non existent short url
     res.statusCode = 404;
     res.send("<p>404: Not found. This short URL does not exist.</p>");
   }
-  //edge case: urldatabase server restarted
-  //status code of redirects
+ 
 });
 
 //delete url -
@@ -119,7 +125,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-//edit url function missing?
+//edit url page
 
 //login -
 app.get('/login', (req, res) => {
@@ -151,9 +157,16 @@ app.post('/logout', (req, res) => {
 
 //registration page -
 app.get('/register', (req, res) => {
-  let templateVars = {user:  users[req.cookies['user_id']] };
+  let templateVars = {
+    email: req.body.email,
+    password: req.body.password,
+    username: users[req.cookies['user_id']]
+  };
+
   res.render('urls_register', templateVars);
 });
+
+
 //registration **
 app.post("/register", (req, res) => {
   // if (!emailFunction(req.body.email)) {
@@ -164,6 +177,7 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     res.statusCode = 409;
     res.send("409: There was an error with the email/password you entered.");
+    res.redirect('/register');
   }
   let userID = generateRandomString();
   users[userID] = {
@@ -171,6 +185,9 @@ app.post("/register", (req, res) => {
     email,
     password
   };
+
+  res.cookie('user_id', users[userID].id);
+  res.redirect('/urls');
   // } else if (emailFunction(req.body.email)) {
   //   res.statusCode = 409;
   //   res.send("409: This email is already registered. Please enter a different email.");

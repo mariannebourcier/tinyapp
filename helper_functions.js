@@ -13,7 +13,7 @@ let users = {
 };
 
 //function to generate a random short URL
-let generateRandomString = function()  {
+let generateRandomString = () =>  {
   return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
 };
 
