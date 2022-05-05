@@ -57,7 +57,10 @@ app.get("/urls.json", (req, res) => {
 //compass instruction
 //url page -
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
+  let templateVars = {
+    urls: urlDatabase,
+    user: users[req.cookies['user_id']]
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -153,17 +156,28 @@ app.get('/register', (req, res) => {
 });
 //registration **
 app.post("/register", (req, res) => {
-  if (!emailFunction(req.body.email)) {
-    let newUserRegister = newUser(req.body.email, req.body.password);
-    res.cookie("user_id", newUserRegister);
-    res.redirect("/urls");
-  } else if (emailFunction(req.body.email)) {
+  // if (!emailFunction(req.body.email)) {
+  //   let newUserRegister = newUser(req.body.email, req.body.password);
+  //   res.cookie("user_id", newUserRegister);
+  //   res.redirect("/urls");
+  const { email, password } = req.body;
+  if (!email || !password) {
     res.statusCode = 409;
-    res.send("409: This email is already registered. Please enter a different email.");
-  } else {
-    res.statusCode = 409;
-    res.send("409: Field empty. Please fill the required fields.");
+    res.send("409: There was an error with the email/password you entered.");
   }
+  let userID = generateRandomString();
+  users[userID] = {
+    userID,
+    email,
+    password
+  };
+  // } else if (emailFunction(req.body.email)) {
+  //   res.statusCode = 409;
+  //   res.send("409: This email is already registered. Please enter a different email.");
+  // } else {
+  //   res.statusCode = 409;
+  //   res.send("409: Field empty. Please fill the required fields.");
+  // }
 });
 
 // app.post('/register', (req, res) => {

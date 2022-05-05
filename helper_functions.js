@@ -20,7 +20,7 @@ let generateRandomString = function()  {
 //function to retrieve user by email
 let emailFunction = (email) => {
   for (let user in users) {
-    if (user.email === email) {
+    if (users[user].email === email) {
       return user;
     }
   }
