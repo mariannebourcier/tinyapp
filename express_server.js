@@ -46,7 +46,7 @@ let users = {
 
 //functions required
 const newUser = require('./helper_functions');
-const emailFunction = require('./helper_functions');
+// const emailFunction = require('./helper_functions');
 //const generateRandomString = require('./helper_functions');
 
 //ROUTES/ENDPOINTS
@@ -132,20 +132,32 @@ app.get('/login', (req, res) => {
   let templateVars = {user:  users[req.cookies['user_id']] };
   res.render('urls_login', templateVars);
 });
+
+
+//email function
+const emailFunction = (email) => {
+  for (let user in users) {
+    const userID = users[user];
+    if (userID.email === email) {
+      return userID;
+    }
+  }
+};
 //login errors not working **
 app.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  const user = emailFunction(email);
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = emailFunction(email); //function no working
 
   if (!user) {
     res.status(403).send("This account does not exist.");
   }
-  if (user.password === password) {
-    res.cookie("user_id", user.id);
-    res.redirect("/urls");
-  } else {
+  if (user.password !== password) {
     res.status(403).send("Password incorrect.");
   }
+
+  res.cookie("user_id", user.id);
+  res.redirect("/urls");
 });
 
 
@@ -169,17 +181,18 @@ app.get('/register', (req, res) => {
 
 //registration **
 app.post("/register", (req, res) => {
-  // if (!emailFunction(req.body.email)) {
-  //   let newUserRegister = newUser(req.body.email, req.body.password);
-  //   res.cookie("user_id", newUserRegister);
-  //   res.redirect("/urls");
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const email = req.body.email;
+  const password = req.body.password;
+  const validEmail = emailFunction();
+
+  if (!email || !password || !validEmail) {
     res.statusCode = 409;
     res.send("409: There was an error with the email/password you entered.");
     res.redirect('/register');
   }
+
   let userID = generateRandomString();
+
   users[userID] = {
     userID,
     email,
@@ -188,30 +201,9 @@ app.post("/register", (req, res) => {
 
   res.cookie('user_id', users[userID].id);
   res.redirect('/urls');
-  // } else if (emailFunction(req.body.email)) {
-  //   res.statusCode = 409;
-  //   res.send("409: This email is already registered. Please enter a different email.");
-  // } else {
-  //   res.statusCode = 409;
-  //   res.send("409: Field empty. Please fill the required fields.");
-  // }
+  
 });
 
-// app.post('/register', (req, res) => {
-//   let userID = generateRandomString();
-//   users[userID] = {
-//     userID,
-//     email: req.body.email,
-//     password: req.body.password
-//   };
-//   if (req.body.email && req.body.password) {
-//     res.cookie('user_id', userID);
-//     res.redirect('/urls');
-//   } else {
-//     res.statusCode = 409;
-//     res.send('<p>409: Email already taken. Please try another email.</p>');
-//   }
-// });
 
 //LISTENER
 app.listen(PORT, () => {
