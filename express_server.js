@@ -45,7 +45,7 @@ let users = {
 };
 
 //functions required
-const newUser = require('./helper_functions');
+// const newUser = require('./helper_functions');
 // const emailFunction = require('./helper_functions');
 //const generateRandomString = require('./helper_functions');
 
@@ -80,7 +80,18 @@ app.get("/urls/new", (req, res) => {
 
   res.render("urls_new", templateVars);
 });
+//urls id short urls
+app.get("/urls/:id", (req, res) => {
+  const user = req.cookies["user_id"];
+  const userUrls = req.params.id;
 
+  if (!user) {
+    res.send("Login or Register to access this page.");
+  }
+  if (userUrls !== user) {
+    res.send("Not permitted.");
+  }
+});
 //generate short url, -
 //**add 200 code ?
 app.post("/urls", (req, res) => {
