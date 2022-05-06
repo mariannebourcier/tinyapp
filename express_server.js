@@ -1,6 +1,30 @@
 let generateRandomString = () =>  {
   return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
 };
+//function to return url for user
+const userURLS = (id) => {
+  let urls = [];
+
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      urls = {
+        shortURL: shortURL,
+        longURL: urlDatabase[shortURL].longURL
+      };
+    }
+  }
+  return urls;
+};
+
+//email function
+const emailFunction = (email) => {
+  for (let user in users) {
+    const userID = users[user];
+    if (userID.email === email) {
+      return userID;
+    }
+  }
+};
 
 //REQUIREMENTS
 let bodyParser = require("body-parser");
@@ -57,7 +81,7 @@ app.get("/urls.json", (req, res) => {
 
 //RENDERING ROUTES/FRONTEND
 
-//url page -
+//url page - /urls GET/POST
 app.get("/urls", (req, res) => {
   const user = req.cookies['user_id'];
 
@@ -76,7 +100,21 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//new url page -
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString();
+  let userID = req.cookies['user_id'];
+
+  urlDatabase[userID] = {
+    longURL: req.body.longURL,
+    userID: userID
+  };
+
+  res.redirect(`/urls/${shortURL}`);
+});
+
+
+
+//new url page - GET
 app.get("/urls/new", (req, res) => {
 
   let user = req.cookies['user_id'];
@@ -93,20 +131,8 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-//function to return url for user
-const userURLS = (id) => {
-  let urls = [];
 
-  for (let shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      urls = {
-        shortURL: shortURL,
-        longURL: urlDatabase[shortURL].longURL
-      };
-    }
-  }
-  return urls;
-};
+
 //urls id short urls
 app.get("/urls/:id", (req, res) => {
   const user = req.cookies['user_id'];
@@ -120,21 +146,9 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
-//generate short url, -
-//**add 200 code ?
-app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
-  let userID = req.cookies['user_id'];
 
-  urlDatabase[userID] = {
-    longURL: req.body.longURL,
-    userID: userID
-  };
 
-  res.redirect(`/urls/${shortURL}`);
-});
-
-//urls short/long page => show -
+//urls/shortURL GET
 app.get("/urls/:shortURL", (req, res) => {
   const user = req.cookies['user_id'];
   const userUrl = req.params.id;
@@ -151,7 +165,8 @@ app.get("/urls/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//delete url -
+
+//delete url - POST
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = req.cookies['user_id'];
   const shortURL = req.params.shortURL;
@@ -175,7 +190,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //edit url page
 
-//login -
+//login - GET/POST
 app.get('/login', (req, res) => {
   const templateVars = {
     user: users[req.cookies['user_id']]
@@ -185,16 +200,6 @@ app.get('/login', (req, res) => {
 });
 
 
-//email function
-const emailFunction = (email) => {
-  for (let user in users) {
-    const userID = users[user];
-    if (userID.email === email) {
-      return userID;
-    }
-  }
-};
-//login errors not working **
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -212,13 +217,14 @@ app.post('/login', (req, res) => {
 });
 
 
-//logout -
+//logout - POST
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
-//registration page -
+
+//registration page - GET/POST
 app.get('/register', (req, res) => {
   let templateVars = {
     email: req.body.email,
@@ -230,7 +236,6 @@ app.get('/register', (req, res) => {
 });
 
 
-//registration **
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
