@@ -59,16 +59,28 @@ app.get("/urls.json", (req, res) => {
 
 //url page -
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies['user_id']]
+  const user = req.cookies['user_id'];
+
+  if (!user) {
+    res.send('Login or register to access this page.');
+  }
+
+  const urls = userURLS(user);
+
+
+  const templateVars = {
+    urls: urls,
+    user: users['user_id']
   };
+
   res.render("urls_index", templateVars);
 });
 
 //new url page -
 app.get("/urls/new", (req, res) => {
+
   let user = req.cookies['user_id'];
+
   if (!user) {
     return res.redirect('/login');
   }
@@ -80,6 +92,7 @@ app.get("/urls/new", (req, res) => {
 
   res.render("urls_new", templateVars);
 });
+
 //function to return url for user
 const userURLS = (id) => {
   let urls = [];
@@ -96,7 +109,7 @@ const userURLS = (id) => {
 };
 //urls id short urls
 app.get("/urls/:id", (req, res) => {
-  const user = req.cookies["user_id"];
+  const user = req.cookies['user_id'];
   const userUrls = userURLS(urlDatabase.userID);
 
   if (!user) {
@@ -106,6 +119,7 @@ app.get("/urls/:id", (req, res) => {
     res.send("Not permitted.");
   }
 });
+
 //generate short url, -
 //**add 200 code ?
 app.post("/urls", (req, res) => {
@@ -122,26 +136,19 @@ app.post("/urls", (req, res) => {
 
 //urls short/long page => show -
 app.get("/urls/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL;
-  let templateVars = {
-    user: users[req.cookies['user_id']],
-    longURL: urlDatabase[shortURL].longURL,
-    shortURL: shortURL
-  };
-  res.render("urls_show", templateVars);
-});
+  const user = req.cookies['user_id'];
+  const userUrl = req.params.id;
 
-//redirect to longurl -
-app.get("/u/:shortURL", (req, res) => {
-  let shortURL = urlDatabase[req.params.shortURL];
-
-  if (shortURL) {
-    res.redirect(urlDatabase[req.params.shortURL].longURL);
-  } else if (!shortURL) {
-    res.statusCode = 404;
-    res.send("<p>404: Not found. This short URL does not exist.</p>");
+  if (!user) {
+    res.send("Login or register.");
   }
- 
+  if (userUrl !== user) {
+    res.send("Not permitted.");
+  }
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
+
+  res.redirect(longURL);
 });
 
 //delete url -
@@ -173,7 +180,7 @@ app.get('/login', (req, res) => {
   const templateVars = {
     user: users[req.cookies['user_id']]
   };
-  
+
   res.render('urls_login', templateVars);
 });
 
