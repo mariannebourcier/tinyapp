@@ -29,6 +29,9 @@ const emailFunction = (email) => {
 //REQUIREMENTS
 let bodyParser = require("body-parser");
 let express = require("express");
+let bcrypt = require('bcryptjs');
+let password = "purple-monkey-dinosaur";
+const hashedPassword = bcrypt.hashSync(password, 10);
 
 //cookie-parser
 let cookieParser = require('cookie-parser');
