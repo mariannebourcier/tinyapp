@@ -17,21 +17,12 @@ const userURLS = (id) => {
 };
 
 //email function
-const emailFunction = (email) => {
-  for (let user in users) {
-    const userID = users[user];
-    if (userID.email === email) {
-      return userID;
-    }
-  }
-};
+
 
 //REQUIREMENTS
 let bodyParser = require("body-parser");
 let express = require("express");
 let bcrypt = require('bcryptjs');
-let password = "purple-monkey-dinosaur";
-const hashedPassword = bcrypt.hashSync(password, 10);
 
 //cookie-parser
 let cookieParser = require('cookie-parser');
@@ -62,14 +53,15 @@ let users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "purpleunicorn"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "sushilover"
   }
 };
+
 
 //functions required
 // const newUser = require('./helper_functions');
@@ -206,17 +198,25 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = emailFunction(email); //function no working
+  const user = users.find(user => user.email === email);
 
+  if (!email || !password) {
+    return res.status(400).send({ message: "Provide email and password."});
+  }
   if (!user) {
-    res.status(403).send("This account does not exist.");
-  }
-  if (user.password !== password) {
-    res.status(403).send("Password incorrect.");
+    return res.status(401).send({ message: "Invalid credentials."});
   }
 
-  res.cookie("user_id", user.id);
-  res.redirect("/urls");
+  const passwordsMatch = bcrypt.compareSync(password, user.password);
+  if (!passwordsMatch) {
+    return res.status(401).send({ message: "Invalid credentials."});
+  }
+  
+  req.session.userId = user.id;
+  res.status(200).send({ message: "User logged in successfully."});
+
+  //res.cookie("user_id", user.id);
+  //res.redirect("/urls");
 });
 
 
@@ -241,25 +241,31 @@ app.get('/register', (req, res) => {
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
-  const validEmail = emailFunction();
+  const password = hashedPassword;
 
-  if (!email || !password || !validEmail) {
-    res.statusCode = 409;
-    res.send("409: There was an error with the email/password you entered.");
-    res.redirect('/register');
+  if (!email || !password) {
+    return res.status(400).send({ message: "Provide email and password to register."});
+  }
+
+  const emailExists = users.find(user => user.email === email);
+  if (emailExists) {
+    return res.status(400).send({ message: "This email is already taken."});
   }
 
   let userID = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
-  users[userID] = {
+  const newUser = {
     userID,
     email,
-    password
+    password: hashedPassword
   };
 
-  res.cookie('user_id', users[userID].id);
-  res.redirect('/urls');
+  users.push(newUser);
+  res.status(201).send({ message: "User registered successfully.", user: newUser});
+
+  //res.cookie('user_id',);
+  //res.redirect('/urls');
   
 });
 
