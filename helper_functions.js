@@ -27,23 +27,23 @@ const getUserByEmail = (email, database) => {
   }
 };
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW"
-  }
-};
+// const urlDatabase = {
+//   b6UTxQ: {
+//     longURL: "https://www.tsn.ca",
+//     userID: "aJ48lW"
+//   },
+//   i3BoGr: {
+//     longURL: "https://www.google.ca",
+//     userID: "aJ48lW"
+//   }
+// };
 //function to return url for user
-const userURLS = (user) => {
-  let urls = [];
+const userURLS = (user, urlDatabase) => {
+  let urls = {};
 
   for (let shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === user) {
-      urls.push(shortURL);
+      urls[shortURL] = urlDatabase[shortURL];
     }
   }
   return urls;
