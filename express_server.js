@@ -1,26 +1,20 @@
-
-
-
-//email function
-
-
-//REQUIREMENTS
-let bodyParser = require("body-parser");
-let express = require("express");
-let bcrypt = require('bcryptjs');
-
-//cookie-parser
-//let cookieParser = require('cookie-parser');
-//cookie-session
+//Requirements
+const bodyParser = require("body-parser");
+const express = require("express");
+const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 
 
-
+//Variables
 let urlDatabase = {};
 let users = {};
 
+//Functions
+const { getUserByEmail, generateRandomString, userURLS } = require('./helper_functions');
+//const { newUser } = require('./helper_functions');
 
-//SETUP AND MIDDLEWARES
+
+//Setup & Middlewares
 let app = express();
 let PORT = 8080; // default port 8080
 
@@ -30,22 +24,18 @@ app.use(cookieSession({
   name: 'session',
   keys: ['secretKey', 'secondSecretKey'],
 
-  maxAge: 24 * 60 * 60 * 1000 //24 hours
+  maxAge: 24 * 60 * 60 * 1000
 }));
 
-//functions required
-//const { newUser } = require('./helper_functions');
-const { getUserByEmail, generateRandomString, userURLS } = require('./helper_functions');
 
-//ROUTES/ENDPOINTS
-//CRUD RESTAPI
+//Routes/Endpoints
+
+//Crud RestAPI
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//RENDERING ROUTES/FRONTEND
-
-//homepage redirect to login
+//Homepage redirect to login
 app.get("/", (req, res) => {
   const user = req.session.user_id;
   if (user) {
@@ -60,10 +50,10 @@ app.get("/", (req, res) => {
 //view all URLS - login first
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
-  const userUrl = userURLS(urlDatabase.userID);
+  const userUrl = userURLS(urlDatabase.user);
   const templateVars = {
     urls: userUrl,
-    user: users[req.session.user_id]
+    user: user
   };
 
   if (!user) {
@@ -191,7 +181,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = getUserByEmail(req.body.email, users);
+  const user = getUserByEmail(email, users);
   const passwordsMatch = bcrypt.compareSync(password, user.password);
 
   if (user && passwordsMatch) {
@@ -213,8 +203,9 @@ app.post('/logout', (req, res) => {
 
 //registration page - GET/POST
 app.get('/register', (req, res) => {
+  const user = users[req.session.user_id];
 
-  if (req.session.userID) {
+  if (user) {
     res.redirect("/urls");
   }
   const templateVars = { user: users[req.session.user_id]};
@@ -238,7 +229,7 @@ app.post("/register", (req, res) => {
       email,
       password
     };
-    users.push(newUser);
+    users[req.session.user_id] = newUser;
     res.redirect("/urls");
   } else {
     res.status(400).send({ message: "Email already taken."});
