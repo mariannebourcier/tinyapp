@@ -1,18 +1,5 @@
 
-//function to return url for user
-const userURLS = (id) => {
-  let urls = [];
 
-  for (let shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      urls = {
-        shortURL: shortURL,
-        longURL: urlDatabase[shortURL].longURL
-      };
-    }
-  }
-  return urls;
-};
 
 //email function
 
@@ -71,9 +58,10 @@ let users = {
 
 
 //functions required
-// const newUser = require('./helper_functions');
+//const { newUser } = require('./helper_functions');
 const { getUserByEmail } = require('./helper_functions');
 const { generateRandomString } = require('./helper_functions');
+const { userURLS } = require('./helper_functions');
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -83,62 +71,64 @@ app.get("/urls.json", (req, res) => {
 
 //RENDERING ROUTES/FRONTEND
 
+//homepage redirect to login
+app.get("/", (req, res) => {
+  const user = req.session.user_id;
+  if (user) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
+});
 
 
 //url page - /urls GET/POST
-//view all URLS
+//view all URLS - login first
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
   const userUrl = userURLS(urlDatabase.userID);
-
-  if (!user) {
-    res.send('Login or register to access this page.');
-  }
-
-  const urls = userURLS(user);
-
-  if (userUrl !== user) {
-    res.send("Not permitted.");
-  }
-
   const templateVars = {
-    urls: urls,
+    urls: userUrl,
     user: users[req.session.user_id]
   };
+
+  if (!user) {
+    res.redirect("/login");
+    //res.status(400).send({ message: "You must be logged in to access this page."});
+  }
 
   res.render("urls_index", templateVars);
 });
 
+//redirect to short url - log in first
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
   let user = users[req.session.user_id];
 
-  urlDatabase[user] = {
-    longURL: req.body.longURL,
-    user: user
-  };
-
-  res.redirect(`/urls/${shortURL}`);
+  if (user) {
+    let shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      user: user
+    };
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
 
 
 
-//new url page - GET
+//new url page - GET if log in
 app.get("/urls/new", (req, res) => {
 
   let user = users[req.session.user_id];
 
   if (!user) {
     return res.redirect('/login');
+  } else {
+    const templateVars = { user: users[req.session.user_id]};
+    res.render("urls_new", templateVars);
   }
 
-  const templateVars = {
-    user: users[req.session.user_id]
-  };
-  //being redirected to login no matter what*** Fix
-
-  res.render("urls_new", templateVars);
 });
 
 

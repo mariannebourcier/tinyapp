@@ -27,9 +27,25 @@ const getUserByEmail = (email, database) => {
   }
 };
 
+//function to return url for user
+const userURLS = (user) => {
+  let urls = [];
+
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === user) {
+      urls.push(shortURL);
+    }
+  }
+  return urls;
+};
+
+// const getUserByEmail = (email, database) => {
+//   return Object.values(database).find(user => user.email === email);
+// }
+
 //function to create new user
 
 
 module.exports = { getUserByEmail,
-  
+  userURLS,
   generateRandomString };
