@@ -18,27 +18,18 @@ let generateRandomString = () =>  {
 };
 
 //function to retrieve user by email
-let emailFunction = (email) => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return user;
+const getUserByEmail = (email, database) => {
+  for (let user in database) {
+    const users = database[user];
+    if (users.email === email) {
+      return users;
     }
   }
 };
 
 //function to create new user
-let newUser = (email, password) => {
-  let userId = generateRandomString();
-  users[userId] = {
-    userId,
-    email,
-    password
-  };
-  return userId;
-};
 
 
-
-module.exports = { newUser,
-  emailFunction,
+module.exports = { getUserByEmail,
+  
   generateRandomString };

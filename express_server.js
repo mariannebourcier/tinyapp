@@ -1,6 +1,4 @@
-let generateRandomString = () =>  {
-  return Array(6).fill(0).map(x => Math.random().toString(36).charAt(2)).join('');
-};
+
 //function to return url for user
 const userURLS = (id) => {
   let urls = [];
@@ -74,8 +72,8 @@ let users = {
 
 //functions required
 // const newUser = require('./helper_functions');
-// const emailFunction = require('./helper_functions');
-//const generateRandomString = require('./helper_functions');
+const { getUserByEmail } = require('./helper_functions');
+const { generateRandomString } = require('./helper_functions');
 
 //ROUTES/ENDPOINTS
 //CRUD RESTAPI
@@ -85,9 +83,13 @@ app.get("/urls.json", (req, res) => {
 
 //RENDERING ROUTES/FRONTEND
 
+
+
 //url page - /urls GET/POST
+//view all URLS
 app.get("/urls", (req, res) => {
-  const user = req.session['user_id'];
+  const user = users[req.session.user_id];
+  const userUrl = userURLS(urlDatabase.userID);
 
   if (!user) {
     res.send('Login or register to access this page.');
@@ -95,10 +97,13 @@ app.get("/urls", (req, res) => {
 
   const urls = userURLS(user);
 
+  if (userUrl !== user) {
+    res.send("Not permitted.");
+  }
 
   const templateVars = {
     urls: urls,
-    user: users['user_id']
+    user: users[req.session.user_id]
   };
 
   res.render("urls_index", templateVars);
@@ -106,11 +111,11 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let userID = req.session['user_id'];
+  let user = users[req.session.user_id];
 
-  urlDatabase[userID] = {
+  urlDatabase[user] = {
     longURL: req.body.longURL,
-    userID: userID
+    user: user
   };
 
   res.redirect(`/urls/${shortURL}`);
@@ -118,17 +123,18 @@ app.post("/urls", (req, res) => {
 
 
 
+
 //new url page - GET
 app.get("/urls/new", (req, res) => {
 
-  let user = req.session['user_id'];
+  let user = users[req.session.user_id];
 
   if (!user) {
     return res.redirect('/login');
   }
 
   const templateVars = {
-    user: users[user]
+    user: users[req.session.user_id]
   };
   //being redirected to login no matter what*** Fix
 
@@ -138,24 +144,14 @@ app.get("/urls/new", (req, res) => {
 
 
 //urls id short urls
-app.get("/urls/:id", (req, res) => {
-  const user = req.session['user_id'];
-  const userUrls = userURLS(urlDatabase.userID);
-
-  if (!user) {
-    res.send("Login or Register to access this page.");
-  }
-  if (userUrls !== user) {
-    res.send("Not permitted.");
-  }
-});
 
 
 
-//urls/shortURL GET
+
+//urls/shortURL GET Redirect to Long URL
 app.get("/urls/:shortURL", (req, res) => {
-  const user = req.session['user_id'];
-  const userUrl = req.params.id;
+  const user = users[req.session.user_id];
+  const userUrl = req.params.id; //?
 
   if (!user) {
     res.send("Login or register.");
@@ -172,7 +168,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //delete url - POST
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const user = req.session['user_id'];
+  const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
   const userUrl = urlDatabase[shortURL].userID;
 
@@ -197,7 +193,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //login - GET/POST
 app.get('/login', (req, res) => {
   const templateVars = {
-    user: users[req.session['user_id']]
+    user: users[req.session.user_id]
   };
 
   res.render('urls_login', templateVars);
@@ -231,7 +227,7 @@ app.post('/login', (req, res) => {
 
 //logout - POST
 app.post('/logout', (req, res) => {
-  res.session = null;
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -241,7 +237,7 @@ app.get('/register', (req, res) => {
   let templateVars = {
     email: req.body.email,
     password: req.body.password,
-    user: users[req.session['user_id']]
+    user: users[req.session.user_id]
   };
 
   res.render('urls_register', templateVars);
@@ -255,9 +251,9 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     return res.status(400).send({ message: "Provide email and password to register."});
   }
-
-  const emailExists = users.find(user => user.email === email);
-  if (emailExists) {
+  const emailCheck = getUserByEmail(email, users[req.session.user_id]);
+  //const emailExists = users.find(user => user.email === email);
+  if (emailCheck) {
     return res.status(400).send({ message: "This email is already taken."});
   }
 
@@ -273,7 +269,6 @@ app.post("/register", (req, res) => {
   users.push(newUser);
   res.status(201).send({ message: "User registered successfully.", user: newUser});
 
-  //res.cookie('user_id',);
   //res.redirect('/urls');
   
 });
