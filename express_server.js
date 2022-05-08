@@ -65,16 +65,20 @@ app.get("/", (req, res) => {
 
 //View all URLS belonging to user - GET
 app.get("/urls", (req, res) => {
-  const user = users[req.session.user_id];
+  const user = req.session.user_id;
+  if (!user) {
+    console.log("hello", user);
+    res.redirect("/login");
+  }
   //Fetch only URLs created by user
   const userUrl = userURLS(user.userID, urlDatabase);
   const templateVars = {
     urls: userUrl,
     user: user
   };
-  if (!user) {
-    res.redirect("/login");
-  }
+  // if (!user) {
+  //   res.redirect("/login");
+  // }
 
   res.render("urls_index", templateVars);
 });
@@ -205,6 +209,11 @@ app.post('/login', (req, res) => {
   }
   //Retrieve the correct user by checking email & password
   const user = getUserByEmail(email, users);
+  if (!user) {
+    res.status(400).send({ message: "This user does not exist."});
+    return;
+  }
+
   const passwordsMatch =  bcrypt.compareSync(password, user.password);
 
   if (user && passwordsMatch) {
@@ -214,6 +223,7 @@ app.post('/login', (req, res) => {
       email,
       password
     };
+    console.log("Log in", users, userID);
     req.session.user_id = users[userID].userID;
     res.redirect("/urls");
   } else {
