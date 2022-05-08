@@ -66,6 +66,7 @@ app.get("/", (req, res) => {
 //View all URLS belonging to user - GET
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
+  //Fetch only URLs created by user
   const userUrl = userURLS(user.userID, urlDatabase);
   const templateVars = {
     urls: userUrl,
@@ -96,9 +97,7 @@ app.post("/urls", (req, res) => {
 
 //Create a short URL page if logged in - GET
 app.get("/urls/new", (req, res) => {
-
   let user = users[req.session.user_id];
-
   if (!user) {
     return res.redirect('/login');
   } else {
@@ -112,6 +111,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const user = users[req.session.user_id];
+  //fetch only URLs created by the user
   const userUrl = userURLS(user.userID, urlDatabase);
 
   const templateVars = {
@@ -153,6 +153,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
+  //Only the URLs created by the user
   const userUrl = userURLS(user.userID, urlDatabase);
 
   if (!user) {
@@ -202,7 +203,7 @@ app.post('/login', (req, res) => {
     res.status(400).send({ message: "Please enter email/password."});
     return;
   }
-
+  //Retrieve the correct user by checking email & password
   const user = getUserByEmail(email, users);
   const passwordsMatch =  bcrypt.compareSync(password, user.password);
 
@@ -239,12 +240,10 @@ app.get('/register', (req, res) => {
   res.render('urls_register', templateVars);
 });
 
-//const password = bcrypt.hashSync(req.body.password, 10);
-
-
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  //Assign a user ID to the email used to register
   let userID = generateRandomString();
   const emailCheck = getUserByEmail(email, users);
   if (!email || !password) {
