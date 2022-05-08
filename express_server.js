@@ -173,7 +173,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 //Redirect to URL - GET
-app.get("/urls/:shortURL", (req, res) => {
+app.get("/u/:shortURL", (req, res) => {
   const shortURL = urlDatabase[req.params.shortURL];
   if (shortURL) {
     res.redirect(shortURL.longURL);
@@ -199,6 +199,11 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  if (!email || !password) {
+    res.status(400).send({ message: "Please enter email/password."});
+    return;
+  }
+
   const user = getUserByEmail(email, users);
   const passwordsMatch =  bcrypt.compareSync(password, user.password);
 
@@ -235,21 +240,25 @@ app.get('/register', (req, res) => {
   res.render('urls_register', templateVars);
 });
 
+//const password = bcrypt.hashSync(req.body.password, 10);
+
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = bcrypt.hashSync(req.body.password, 10);
+  const password = req.body.password;
   let userID = generateRandomString();
   const emailCheck = getUserByEmail(email, users);
   if (!email || !password) {
     res.status(400).send({ message: "Fill the email/password field."});
+    return;
   }
 
   if (!emailCheck) {
+    const hashedPassword = bcrypt.hashSync(password, 10);
     users[userID] = {
       userID,
       email,
-      password
+      password: hashedPassword
     };
     req.session.user_id = users[userID].userID;
     res.redirect("/urls");

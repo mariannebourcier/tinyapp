@@ -41,16 +41,13 @@ const testUrls = {
 
 describe('#userURLS', () => {
   it('should return the url that belongs to the user.', () => {
-    const userUrls = userURLS('', testUrls);
+    const userUrls = userURLS('chapeau', testUrls);
+    console.log("hello", userUrls);
     const expected = {
       'mario': {
         longURL: 'http://www.facebook.com',
-        userID: 'alouette'
-      },
-      'choupi': {
-        longURL: 'http://www.google.com',
         userID: 'chapeau'
-      },
+      }
     };
     assert.deepEqual(userUrls, expected);
   });

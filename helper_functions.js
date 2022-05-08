@@ -25,6 +25,7 @@ const getUserByEmail = (email, database) => {
       return users;
     }
   }
+  return null;
 };
 //Database example
 const urlDatabase = {
