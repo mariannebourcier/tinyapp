@@ -67,7 +67,7 @@ app.get("/", (req, res) => {
 //view all URLS - login first
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
-  const userUrl = userURLS(user.userID, urlDatabase);
+  const userUrl = userURLS(user, urlDatabase);
   const templateVars = {
     urls: userUrl,
     user: user
@@ -198,13 +198,10 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  //const hashedPassword = password.
   const user = getUserByEmail(email, users);
+  const passwordsMatch =  bcrypt.compareSync(password, user.password);
 
-  const passwordsMatch = bcrypt.compareSync(password, user.password);
   if (user && passwordsMatch) {
-    
-
     const userID = generateRandomString();
     users[userID] = {
       userID,
@@ -212,7 +209,6 @@ app.post('/login', (req, res) => {
       password
     };
     req.session.user_id = users[userID].userID;
-    // res.status(200).send({ message: "User logged in successfully."});
     res.redirect("/urls");
   } else {
     res.status(400).send({ message: "Invalid login."});
@@ -240,7 +236,6 @@ app.get('/register', (req, res) => {
 
 
 app.post("/register", (req, res) => {
-
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
   let userID = generateRandomString();

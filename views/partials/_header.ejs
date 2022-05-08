@@ -14,7 +14,6 @@
       <% if (user) { %>
         <form class="form-inline" action="/logout" method="POST">
           Logged in as: <%= user.email %>
-          <input class="form-control" type="text" name="username" placeholder="Username" style="width: 170px"> 
           <button type="submit" class="btn bg-transparent btn-outline-light">Logout</button>
         </form>
       <% } else { %>
