@@ -52,7 +52,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//Homepage redirect to login
+//Homepage redirect to login - GET
 app.get("/", (req, res) => {
   const user = users[req.session.user_id];
   if (user) {
@@ -63,11 +63,11 @@ app.get("/", (req, res) => {
 });
 
 
-//url page - /urls GET/POST
-//view all URLS - login first
+
+//View all URLS belonging to user - GET
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
-  const userUrl = userURLS(user, urlDatabase);
+  const userUrl = userURLS(user.userID, urlDatabase);
   const templateVars = {
     urls: userUrl,
     user: user
@@ -79,7 +79,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//create short url/redirect to short url - log in first
+//Create a short URL and redirect to short URL - POST
 app.post("/urls", (req, res) => {
   let user = users[req.session.user_id];
   if (user) {
@@ -95,7 +95,7 @@ app.post("/urls", (req, res) => {
 
 
 
-//new url page - GET if log in
+//Create a short URL page if logged in - GET
 app.get("/urls/new", (req, res) => {
 
   let user = users[req.session.user_id];
@@ -109,7 +109,7 @@ app.get("/urls/new", (req, res) => {
 
 });
 
-//urls/shortURL GET Redirect to Long URL
+//Short URLs to user - GET
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const user = users[req.session.user_id];
@@ -131,7 +131,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-//edit url if log in
+//Edit URL if logged in - POST
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const user = users[req.session.user_id];
@@ -150,7 +150,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 
-//delete url - POST
+//Delete URL - POST
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
@@ -172,6 +172,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 });
 
+//Redirect to URL - GET
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = urlDatabase[req.params.shortURL];
   if (shortURL) {
@@ -181,7 +182,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-//login - GET/POST
+//Login - GET/POST
 app.get('/login', (req, res) => {
   const user = users[req.session.user_id];
 
@@ -216,14 +217,14 @@ app.post('/login', (req, res) => {
 });
 
 
-//logout - POST
+//Logout - POST
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/');
 });
 
 
-//registration page - GET/POST
+//Registration page - GET/POST
 app.get('/register', (req, res) => {
   const user = users[req.session.user_id];
 
