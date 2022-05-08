@@ -28,7 +28,6 @@ let users = {
 
 //Functions
 const { getUserByEmail, generateRandomString, userURLS } = require('./helper_functions');
-//const { newUser } = require('./helper_functions');
 
 
 //Setup & Middlewares
