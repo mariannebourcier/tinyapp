@@ -67,7 +67,7 @@ app.get("/", (req, res) => {
 //view all URLS - login first
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
-  const userUrl = userURLS(user.userID, urlDatabase);
+  const userUrl = userURLS(user, urlDatabase);
   const templateVars = {
     urls: userUrl,
     user: user

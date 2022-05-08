@@ -41,7 +41,6 @@ const urlDatabase = {
 //Function to return url for user
 const userURLS = (user, urlDatabase) => {
   let urls = {};
-
   for (let shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === user) {
       urls[shortURL] = urlDatabase[shortURL];

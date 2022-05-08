@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getUserByEmail } = require('../helper_functions.js');
+const { getUserByEmail, userURLS } = require('../helper_functions.js');
 
 const testUsers = {
   "mario": {
@@ -24,5 +24,39 @@ describe('#getUserByEmail', () => {
   it("returns undefined with an invalid email", () => {
     const user = getUserByEmail("123", testUsers);
     assert.equal(user, undefined);
+  });
+});
+
+const testUrls = {
+  'choupi': {
+    longURL: 'http://www.google.com',
+    userID: 'alouette'
+  },
+  'mario': {
+    longURL: 'http://www.facebook.com',
+    userID: 'chapeau'
+  },
+
+};
+
+describe('#userURLS', () => {
+  it('should return the url that belongs to the user.', () => {
+    const userUrls = userURLS('', testUrls);
+    const expected = {
+      'mario': {
+        longURL: 'http://www.facebook.com',
+        userID: 'alouette'
+      },
+      'choupi': {
+        longURL: 'http://www.google.com',
+        userID: 'chapeau'
+      },
+    };
+    assert.deepEqual(userUrls, expected);
+  });
+
+  it('should return an empty object for a nonexistent user.', () => {
+    const userUrls = userURLS('patchou', testUrls);
+    assert.deepEqual(userUrls, {});
   });
 });
